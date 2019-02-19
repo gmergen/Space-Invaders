@@ -2,6 +2,15 @@ import pygame
 
 windowWidth = 400
 windowHeight = 600
+game_side_margin = 10
+game_top_margin = 40
+game_bottom_margin = game_top_margin
+game_border_width = 3
+
+wall_top = game_top_margin + game_border_width
+wall_left = game_side_margin + game_border_width
+wall_right = windowWidth - game_side_margin - game_border_width
+wall_bottom = windowHeight - game_bottom_margin - game_border_width
 
 black = (0,0,0)
 white = (255,255,255)
@@ -13,6 +22,7 @@ pygame.init()
 playerImg = pygame.image.load("si-player.gif")
 enemyImg = pygame.image.load("si-enemy.gif")
 bulletImg = pygame.image.load("si-bullet.gif")
+backgroundImg = pygame.image.load("si-background.gif")
 
 gameDisplay = pygame.display.set_mode((400,600))
 pygame.display.set_caption('Space Invaders')
@@ -96,7 +106,9 @@ while player1.is_alive:
                 player1.shoot()
 
     gameDisplay.blit(gameDisplay, (0,0))
-    gameDisplay.fill(black)
+    gameDisplay.fill(black) 
+    pygame.draw.rect(gameDisplay, white, (game_side_margin, game_top_margin, windowWidth - game_side_margin * 2, windowHeight - game_top_margin - game_bottom_margin))
+    gameDisplay.blit(backgroundImg, (wall_left, wall_top), (0,0, wall_right - wall_left, wall_bottom - wall_top))
     
     # check all enemies to see if one has reached a wall
     for enemy in enemies:
