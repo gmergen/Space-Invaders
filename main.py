@@ -44,7 +44,20 @@ class Player(GameObject):
 
 class Enemy(GameObject):
     def __init__(self, xcor, ycor, image, speed):
-       super().__init__(xcor, ycor, image, speed)
+        super().__init__(xcor, ycor, image, speed)
+        self.direction = 1
+    def move_over(self):
+        self.xcor += self.direction * self.speed
+    def move_down(self):
+        self.ycor += 15
+    def change_direction(self):
+        self.direction *= -1
+
+class Bullet(GameObject):
+    def __init__ (self, xcor, ycor, image, speed):
+        super().__init__ (xcor, ycor, image, speed)
+    def move_up(self):
+        self.ycor -= self.speed 
 
 clock = pygame.time.Clock()
 
@@ -53,7 +66,12 @@ playerImg = pygame.image.load("si-player.gif")
 enemyImg = pygame.image.load("si-enemy.gif")
 
 player1 = Player(200, 200, playerImg, 5)
-enemy1 = Enemy(100, 100, enemyImg, 5)
+
+enemies = []
+
+for x in range(0, 5):
+    newEnemy = Enemy((enemyImg.get_width() + 5) * x + 1, 10, enemyImg, 2)
+    enemies.append(newEnemy)
 
 # main game loop
 while player1.is_alive:
@@ -70,8 +88,22 @@ while player1.is_alive:
 
     gameDisplay.blit(gameDisplay, (0,0))
     gameDisplay.fill(black)
+    
+    # check all enemies to see if one has reached a wall
+    for enemy in enemies:
+        if enemy.xcor <= 0 or enemy.xcor >= windowWidth - enemy.width:
+            # since one enemy has reached a wall, change all enemies directions
+            for e in enemies:
+                e.change_direction()
+                e.move_down()
+            # since one enemy has reached a wall, then stop checking the other enemies
+            break
 
-    enemy1.show()
+    # move and show all enemies
+    for enemy in enemies:
+        enemy.move_over()
+        enemy.show()
+    
     player1.show()
   
     pygame.display.update()
