@@ -9,6 +9,11 @@ blue = (0,0,255)
 
 pygame.init()
 
+# load game images
+playerImg = pygame.image.load("si-player.gif")
+enemyImg = pygame.image.load("si-enemy.gif")
+bulletImg = pygame.image.load("si-bullet.gif")
+
 gameDisplay = pygame.display.set_mode((400,600))
 pygame.display.set_caption('Space Invaders')
 
@@ -41,6 +46,10 @@ class Player(GameObject):
         self.direction = -1
     def stop_moving(self):
         self.direction = 0
+    def shoot(self):
+        # TODO: play sound
+        newBullet = Bullet(self.xcor + self.width / 2 - bulletImg.get_width() / 2, self.ycor - bulletImg.get_height(), bulletImg, 10)
+        bullets.append(newBullet)
 
 class Enemy(GameObject):
     def __init__(self, xcor, ycor, image, speed):
@@ -61,13 +70,10 @@ class Bullet(GameObject):
 
 clock = pygame.time.Clock()
 
-# load game images
-playerImg = pygame.image.load("si-player.gif")
-enemyImg = pygame.image.load("si-enemy.gif")
-
 player1 = Player(200, 200, playerImg, 5)
 
 enemies = []
+bullets = []
 
 for x in range(0, 5):
     newEnemy = Enemy((enemyImg.get_width() + 5) * x + 1, 10, enemyImg, 2)
@@ -76,6 +82,7 @@ for x in range(0, 5):
 # main game loop
 while player1.is_alive:
 
+    # event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             player1.is_alive = False
@@ -85,6 +92,8 @@ while player1.is_alive:
                 player1.move_left()
             elif event.key == pygame.K_RIGHT:
                 player1.move_right()
+            elif event.key == pygame.K_SPACE:
+                player1.shoot()
 
     gameDisplay.blit(gameDisplay, (0,0))
     gameDisplay.fill(black)
@@ -103,6 +112,12 @@ while player1.is_alive:
     for enemy in enemies:
         enemy.move_over()
         enemy.show()
+
+    # move and show all bullets
+    for bullet in bullets:
+        bullet.move_up()
+        bullet.show()
+
     
     player1.show()
   
