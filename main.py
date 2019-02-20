@@ -1,4 +1,9 @@
 import pygame
+from game_object import GameObject
+from player import Player
+from enemy import Enemy
+from bullet import Bullet
+from level import Level
 
 windowWidth = 400
 windowHeight = 600
@@ -20,15 +25,15 @@ red = (255,0,0)
 pygame.init()
 
 # load game images
-playerImg = pygame.image.load("si-player.gif")
-enemyImg = pygame.image.load("si-enemy.gif")
-bulletImg = pygame.image.load("si-bullet.gif")
-backgroundImg = pygame.image.load("si-background.gif")
+playerImg = pygame.image.load("media\\si-player.gif")
+enemyImg = pygame.image.load("media\\si-enemy.gif")
+bulletImg = pygame.image.load("media\\si-bullet.gif")
+backgroundImg = pygame.image.load("media\\si-background.gif")
 
 # load sounds
-laser_sound = pygame.mixer.Sound('si-laser.wav')
-explosion_sound = pygame.mixer.Sound('si-explode.wav') 
-pygame.mixer.music.load('Bohemian.mp3')
+laser_sound = pygame.mixer.Sound('media\\si-laser.wav')
+explosion_sound = pygame.mixer.Sound('media\\si-explode.wav') 
+pygame.mixer.music.load('media\\Bohemian.mp3')
 pygame.mixer.music.play(-1)
 
 title_font = pygame.font.SysFont('Arial', 40, True)
@@ -37,83 +42,35 @@ score_font = pygame.font.SysFont('Arial', 26, True)
 gameDisplay = pygame.display.set_mode((400,600))
 pygame.display.set_caption('Space Invaders')
 
-class GameObject(object):
-    def __init__(self, xcor, ycor, image, speed):
-        self.xcor = xcor
-        self.ycor = ycor
-        self.img = image
-        self.speed = speed
-        self.width = image.get_width()
-        self.height = image.get_height()
-    def show(self):
-        gameDisplay.blit(self.img, (self.xcor, self.ycor))
-    def colliedes_with(self, foreign_object):
-        return foreign_object.xcor < self.xcor + self.width \
-        and foreign_object.xcor + foreign_object.width > self.xcor \
-        and foreign_object.ycor < self.ycor + self.height \
-        and foreign_object.ycor + self.height > self.ycor 
         
-class Player(GameObject):
-    def __init__(self, xcor, ycor, image, speed):
-        super().__init__(xcor, ycor, image, speed)
-        self.is_alive = True
-        self.direction = 0
-        self.score = 0
-    def show(self):
-        new_xcor = self.xcor + self.direction * self.speed
-        if new_xcor < wall_left or new_xcor > wall_right - self.width:
-            self.xcor = self.xcor
-        else:
-            self.xcor = new_xcor
-        super().show()
-    def move_right(self):
-        self.direction = 1
-    def move_left(self):
-        self.direction = -1
-    def stop_moving(self):
-        self.direction = 0
-    def shoot(self):
-        laser_sound.play()
-        newBullet = Bullet(self.xcor + self.width / 2 - bulletImg.get_width() / 2, self.ycor - bulletImg.get_height(), bulletImg, 10)
-        bullets.append(newBullet)
-    def change_score(self, amount_to_change_by):
-        self.score += amount_to_change_by 
-
-class Enemy(GameObject):
-    def __init__(self, xcor, ycor, image, speed):
-        super().__init__(xcor, ycor, image, speed)
-        self.direction = 1
-    def move_over(self):
-        self.xcor += self.direction * self.speed
-    def move_down(self):
-        self.ycor += 15
-    def change_direction(self):
-        self.direction *= -1
-
-class Bullet(GameObject):
-    def __init__ (self, xcor, ycor, image, speed):
-        super().__init__ (xcor, ycor, image, speed)
-    def move_up(self):
-        self.ycor -= self.speed 
-
 clock = pygame.time.Clock()
 
 player1 = Player(wall_left + (wall_right - wall_left) / 2 - playerImg.get_width() / 2,
     wall_bottom - playerImg.get_height() - 1, playerImg, 5)
 
-enemies = []
 bullets = []
+levels = []
 
-for row in range(0, 3):
-    for column in range(0, 5):
-        newEnemy = Enemy((enemyImg.get_width() + 5) * column + wall_left + 1, \
-            (enemyImg.get_height() + 5) * row + wall_top + 1, \
-            enemyImg, 2)
-        enemies.append(newEnemy)
-   
+levels.append(Level(3, 5, 2, 1, enemyImg, wall_left, wall_top))
+levels.append(Level(4, 5, 2, 2, enemyImg, wall_left, wall_top))
+levels.append(Level(4, 7, 3, 3, enemyImg, wall_left, wall_top))
+levels.append(Level(5, 7, 3, 4, enemyImg, wall_left, wall_top))
+levels.append(Level(6, 8, 4, 5, enemyImg, wall_left, wall_top))
+
+current_level_number = 1
+
 # main game loop
 while player1.is_alive:
 
+    enemies = levels[current_level_number - 1].enemies
+
+    if len(enemies) == 0:
+        current_level_number += 1
+        if current_level_number < len(levels):
+            enemies = levels[current_level_number - 1].enemies
+        else:
+            player1.is_alive = False
+    
     # event handling
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -172,7 +129,7 @@ while player1.is_alive:
         if enemy.colliedes_with(player1):
             player1.is_alive = False
 
-    player1.show()
+    player1.show(gameDisplay, wall_left, wall_top)
 
      # move and show all enemies
     for enemy in enemies:
