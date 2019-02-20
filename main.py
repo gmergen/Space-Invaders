@@ -15,6 +15,7 @@ wall_bottom = windowHeight - game_bottom_margin - game_border_width
 black = (0,0,0)
 white = (255,255,255)
 blue = (0,0,255)
+red = (255,0,0)
 
 pygame.init()
 
@@ -23,6 +24,15 @@ playerImg = pygame.image.load("si-player.gif")
 enemyImg = pygame.image.load("si-enemy.gif")
 bulletImg = pygame.image.load("si-bullet.gif")
 backgroundImg = pygame.image.load("si-background.gif")
+
+# load sounds
+laser_sound = pygame.mixer.Sound('si-laser.wav')
+explosion_sound = pygame.mixer.Sound('si-explode.wav') 
+pygame.mixer.music.load('Bohemian.mp3')
+pygame.mixer.music.play(-1)
+
+title_font = pygame.font.SysFont('Arial', 40, True)
+score_font = pygame.font.SysFont('Arial', 26, True)
 
 gameDisplay = pygame.display.set_mode((400,600))
 pygame.display.set_caption('Space Invaders')
@@ -48,6 +58,7 @@ class Player(GameObject):
         super().__init__(xcor, ycor, image, speed)
         self.is_alive = True
         self.direction = 0
+        self.score = 0
     def show(self):
         new_xcor = self.xcor + self.direction * self.speed
         if new_xcor < wall_left or new_xcor > wall_right - self.width:
@@ -62,9 +73,11 @@ class Player(GameObject):
     def stop_moving(self):
         self.direction = 0
     def shoot(self):
-        # TODO: play sound
+        laser_sound.play()
         newBullet = Bullet(self.xcor + self.width / 2 - bulletImg.get_width() / 2, self.ycor - bulletImg.get_height(), bulletImg, 10)
         bullets.append(newBullet)
+    def change_score(self, amount_to_change_by):
+        self.score += amount_to_change_by 
 
 class Enemy(GameObject):
     def __init__(self, xcor, ycor, image, speed):
@@ -120,6 +133,10 @@ while player1.is_alive:
 
     gameDisplay.blit(gameDisplay, (0,0))
     gameDisplay.fill(black) 
+    title_text = title_font.render('SPACE INVADERS', False, red)
+    gameDisplay.blit(title_text, (windowWidth / 2 - title_text.get_width() / 2, 5))
+    score_text = score_font.render('SCORE: ' + str(player1.score), False, blue)
+    gameDisplay.blit(score_text, (wall_left, wall_bottom + game_border_width))
     pygame.draw.rect(gameDisplay, white, (game_side_margin, game_top_margin, windowWidth - game_side_margin * 2, windowHeight - game_top_margin - game_bottom_margin))
     gameDisplay.blit(backgroundImg, (wall_left, wall_top), (0,0, wall_right - wall_left, wall_bottom - wall_top))
     
@@ -130,10 +147,12 @@ while player1.is_alive:
 
         # check if this bullet has hit any enemies
         for enemy in enemies:
-            # if the bullet collieds with an enemy, remove both fro mtheir arrays
+            # if the bullet collieds with an enemy, remove both from their arrays
             if bullet.colliedes_with(enemy):
+                explosion_sound.play()
                 enemies.remove(enemy)
                 bullets.remove(bullet)
+                player1.change_score(150)
                 break
         
         if bullet.ycor < wall_top:
@@ -150,7 +169,12 @@ while player1.is_alive:
             # since one enemy has reached a wall, then stop checking the other enemies
             break
 
-    # move and show all enemies
+        if enemy.colliedes_with(player1):
+            player1.is_alive = False
+
+    player1.show()
+
+     # move and show all enemies
     for enemy in enemies:
         enemy.move_over()
         enemy.show()
@@ -159,12 +183,24 @@ while player1.is_alive:
     for bullet in bullets:
         bullet.move_up()
         bullet.show()
-
-    
-    player1.show()
+       
   
     pygame.display.update()
- 
     clock.tick(60)
+
+show_final_screen = True
+while show_final_screen:
+    score_text = score_font.render('SCORE: ' + str(player1.score), False, blue)
+    gameDisplay.blit(score_text, (windowWidth / 2 - score_text.get_width() / 2, windowHeight / 2))
+
+    pygame.display.update()
+    
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            show_final_screen = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                show_final_screen = False
+
 
 pygame.quit()
