@@ -7,7 +7,8 @@ class Level:
 
         for row in range(0, row_count):
             for col in range(0, col_count):
-                newEnemy = Enemy((enemyImg.get_width() + 5) * col + wall_left + 1, \
-                    (enemyImg.get_height() + 5) * row + wall_top + 1, \
-                    enemyImg, speed)
-                self.enemies.append(newEnemy)
+                if row * col % 2 == 0:
+                    newEnemy = Enemy((enemyImg.get_width() + 5) * col + wall_left + 1, \
+                        (enemyImg.get_height() + 5) * row + wall_top + 1, \
+                        enemyImg, speed)
+                    self.enemies.append(newEnemy)

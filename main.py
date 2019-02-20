@@ -25,15 +25,15 @@ red = (255,0,0)
 pygame.init()
 
 # load game images
-playerImg = pygame.image.load("media\\si-player.gif")
-enemyImg = pygame.image.load("media\\si-enemy.gif")
-bulletImg = pygame.image.load("media\\si-bullet.gif")
-backgroundImg = pygame.image.load("media\\si-background.gif")
+playerImg = pygame.image.load("media/si-player.gif")
+enemyImg = pygame.image.load("media/si-enemy.gif")
+bulletImg = pygame.image.load("media/si-bullet.gif")
+backgroundImg = pygame.image.load("media/si-background.gif")
 
 # load sounds
-laser_sound = pygame.mixer.Sound('media\\si-laser.wav')
-explosion_sound = pygame.mixer.Sound('media\\si-explode.wav') 
-pygame.mixer.music.load('media\\Bohemian.mp3')
+laser_sound = pygame.mixer.Sound('media/si-laser.wav')
+explosion_sound = pygame.mixer.Sound('media/si-explode.wav') 
+pygame.mixer.music.load('media/Bohemian.mp3')
 pygame.mixer.music.play(-1)
 
 title_font = pygame.font.SysFont('Arial', 40, True)
@@ -82,7 +82,7 @@ while player1.is_alive:
             elif event.key == pygame.K_RIGHT:
                 player1.move_right()
             elif event.key == pygame.K_SPACE:
-                player1.shoot()
+                player1.shoot(bullets, bulletImg, laser_sound)
 
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
@@ -129,17 +129,17 @@ while player1.is_alive:
         if enemy.colliedes_with(player1):
             player1.is_alive = False
 
-    player1.show(gameDisplay, wall_left, wall_top)
+    player1.show(gameDisplay, wall_left, wall_right)
 
      # move and show all enemies
     for enemy in enemies:
         enemy.move_over()
-        enemy.show()
+        enemy.show(gameDisplay)
 
     # move and show all bullets
     for bullet in bullets:
         bullet.move_up()
-        bullet.show()
+        bullet.show(gameDisplay)
        
   
     pygame.display.update()
