@@ -25,14 +25,15 @@ red = (255,0,0)
 pygame.init()
 
 # load game images
-playerImg = pygame.image.load("media/si-player.gif")
+playerImg = pygame.image.load("media/si-player.gif") # was play.gif, switched to ship
 enemyImg = pygame.image.load("media/si-enemy.gif")
 bulletImg = pygame.image.load("media/si-bullet.gif")
 backgroundImg = pygame.image.load("media/si-background.gif")
 
 # load sounds
 laser_sound = pygame.mixer.Sound('media/si-laser.wav')
-explosion_sound = pygame.mixer.Sound('media/si-explode.wav') 
+# explosion_sound = pygame.mixer.Sound('media/si-explode.wav')
+oof_sound = pygame.mixer.Sound('media/si-oof.wav') 
 pygame.mixer.music.load('media/Bohemian.mp3')
 pygame.mixer.music.play(-1)
 
@@ -76,7 +77,7 @@ while player1.is_alive:
         if event.type == pygame.QUIT:
             player1.is_alive = False
 
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player1.move_left()
             elif event.key == pygame.K_RIGHT:
@@ -106,7 +107,7 @@ while player1.is_alive:
         for enemy in enemies:
             # if the bullet collieds with an enemy, remove both from their arrays
             if bullet.colliedes_with(enemy):
-                explosion_sound.play()
+                oof_sound.play()
                 enemies.remove(enemy)
                 bullets.remove(bullet)
                 player1.change_score(150)
